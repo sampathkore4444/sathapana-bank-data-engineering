@@ -1,0 +1,283 @@
+// ============================================================================
+// SATHAPANA BANK - POWER BI DAX MEASURES
+// ============================================================================
+// File: Credit Risk Measures
+// Purpose: DAX calculations for Credit Risk Dashboard
+// ============================================================================
+
+// ============================================================================
+// PORTFOLIO SUMMARY MEASURES
+// ============================================================================
+
+// Total Loans Count
+Total Loans = COUNTROWS(fact_loan_portfolio)
+
+// Total Disbursed Amount
+Total Disbursed = SUM(fact_loan_portfolio[disbursed_amount])
+
+// Total Outstanding Principal
+Total Outstanding = SUM(fact_loan_portfolio[outstanding_principal])
+
+// Total Provision Amount
+Total Provisions = SUM(fact_loan_portfolio[provision_amount])
+
+// Average Interest Rate
+Avg Interest Rate = AVERAGE(fact_loan_portfolio[interest_rate])
+
+// ============================================================================
+// RISK CLASSIFICATION MEASURES
+// ============================================================================
+
+// NPL Count (Days Past Due > 90)
+NPL Count = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[days_past_due] > 90
+)
+
+// NPL Amount
+NPL Amount = 
+CALCULATE(
+    SUM(fact_loan_portfolio[outstanding_principal]),
+    fact_loan_portfolio[days_past_due] > 90
+)
+
+// NPL Ratio (%)
+NPL Ratio = 
+DIVIDE(
+    [NPL Amount],
+    [Total Outstanding],
+    0
+) * 100
+
+// Standard Loans Count
+Standard Loans = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[risk_classification] = "STANDARD"
+)
+
+// Special Mention Loans Count
+Special Mention Loans = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[risk_classification] = "SPECIAL_MENTION"
+)
+
+// Substandard Loans Count
+Substandard Loans = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[risk_classification] = "SUBSTANDARD"
+)
+
+// Doubtful Loans Count
+Doubtful Loans = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[risk_classification] = "DOUBTFUL"
+)
+
+// Loss Loans Count
+Loss Loans = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[risk_classification] = "LOSS"
+)
+
+// ============================================================================
+// DAYS PAST DUE MEASURES
+// ============================================================================
+
+// Current Loans (0 DPD)
+Current Loans = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[days_past_due] = 0
+)
+
+// DPD 1-30
+DPD 1-30 = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[days_past_due] >= 1 && fact_loan_portfolio[days_past_due] <= 30
+)
+
+// DPD 31-60
+DPD 31-60 = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[days_past_due] >= 31 && fact_loan_portfolio[days_past_due] <= 60
+)
+
+// DPD 61-90
+DPD 61-90 = 
+CALCULATE(
+    COUNTROWS(fact_loan_portfolio),
+    fact_loan_portfolio[days_past_due] >= 61 && fact_loan_portfolio[days_past_due] <= 90
+)
+
+// DPD 90+
+DPD 90+ = [NPL Count]
+
+// ============================================================================
+// PROVISIONING MEASURES
+// ============================================================================
+
+// Provision Coverage Ratio
+Provision Coverage = 
+DIVIDE(
+    [Total Provisions],
+    [NPL Amount],
+    0
+) * 100
+
+// Required Provision (Basel III)
+Required Provision = 
+SUMX(
+    fact_loan_portfolio,
+    SWITCH(
+        fact_loan_portfolio[risk_classification],
+        "STANDARD", fact_loan_portfolio[outstanding_principal] * 0.01,
+        "SPECIAL_MENTION", fact_loan_portfolio[outstanding_principal] * 0.03,
+        "SUBSTANDARD", fact_loan_portfolio[outstanding_principal] * 0.20,
+        "DOUBTFUL", fact_loan_portfolio[outstanding_principal] * 0.50,
+        "LOSS", fact_loan_portfolio[outstanding_principal] * 1.00,
+        0
+    )
+)
+
+// Provision Gap
+Provision Gap = [Total Provisions] - [Required Provision]
+
+// ============================================================================
+// PORTFOLIO QUALITY MEASURES
+// ============================================================================
+
+// Portfolio at Risk (PAR)
+PAR Ratio = 
+DIVIDE(
+    CALCULATE(
+        SUM(fact_loan_portfolio[outstanding_principal]),
+        fact_loan_portfolio[days_past_due] > 0
+    ),
+    [Total Outstanding],
+    0
+) * 100
+
+// Weighted Average Days Past Due
+Avg DPD = 
+AVERAGE(fact_loan_portfolio[days_past_due])
+
+// Maximum Days Past Due
+Max DPD = MAX(fact_loan_portfolio[days_past_due])
+
+// ============================================================================
+// GROWTH MEASURES
+// ============================================================================
+
+// Loans Count MoM Growth
+Loans Count MoM = 
+VAR CurrentMonth = [Total Loans]
+VAR PreviousMonth = 
+    CALCULATE(
+        [Total Loans],
+        DATEADD(dim_date[full_date], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - PreviousMonth, PreviousMonth, 0) * 100
+
+// Outstanding MoM Growth
+Outstanding MoM = 
+VAR CurrentMonth = [Total Outstanding]
+VAR PreviousMonth = 
+    CALCULATE(
+        [Total Outstanding],
+        DATEADD(dim_date[full_date], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - PreviousMonth, PreviousMonth, 0) * 100
+
+// NPL Ratio MoM Change
+NPL Ratio MoM Change = 
+VAR CurrentMonth = [NPL Ratio]
+VAR PreviousMonth = 
+    CALCULATE(
+        [NPL Ratio],
+        DATEADD(dim_date[full_date], -1, MONTH)
+    )
+RETURN
+    CurrentMonth - PreviousMonth
+
+// ============================================================================
+// BRANCH PERFORMANCE MEASURES
+// ============================================================================
+
+// Branch NPL Rank
+Branch NPL Rank = 
+RANKX(
+    ALL(dim_branch[branch_name]),
+    [NPL Ratio],
+    ,
+    DESC,
+    DENSE
+)
+
+// Branch Portfolio Rank
+Branch Portfolio Rank = 
+RANKX(
+    ALL(dim_branch[branch_name]),
+    [Total Outstanding],
+    ,
+    DESC,
+    DENSE
+)
+
+// ============================================================================
+// TARGET/THRESHOLD MEASURES
+// ============================================================================
+
+// NPL Status (Traffic Light)
+NPL Status = 
+SWITCH(
+    TRUE(),
+    [NPL Ratio] <= 2, "GREEN",
+    [NPL Ratio] <= 5, "YELLOW",
+    [NPL Ratio] <= 10, "ORANGE",
+    "RED"
+)
+
+// Provision Status
+Provision Status = 
+SWITCH(
+    TRUE(),
+    [Provision Coverage] >= 100, "ADEQUATE",
+    [Provision Coverage] >= 80, "MINOR SHORTFALL",
+    [Provision Coverage] >= 50, "MAJOR SHORTFALL",
+    "CRITICAL"
+)
+
+// ============================================================================
+// TIME INTELLIGENCE MEASURES
+// ============================================================================
+
+// YTD Outstanding
+Outstanding YTD = 
+TOTALYTD(
+    [Total Outstanding],
+    dim_date[full_date]
+)
+
+// YTD Disbursed
+Disbursed YTD = 
+TOTALYTD(
+    [Total Disbursed],
+    dim_date[full_date]
+)
+
+// YTD Provisions
+Provisions YTD = 
+TOTALYTD(
+    [Total Provisions],
+    dim_date[full_date]
+)

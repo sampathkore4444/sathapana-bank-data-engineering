@@ -1,0 +1,371 @@
+// ============================================================================
+// SATHAPANA BANK - CUSTOMER ANALYTICS DAX MEASURES
+// ============================================================================
+
+// ============================================================================
+// CUSTOMER COUNT MEASURES
+// ============================================================================
+
+// Total Customers
+Total Customers = COUNTROWS(dim_customer)
+
+// Active Customers
+Active Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[is_active] = 1
+)
+
+// New Customers (Current Month)
+New Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[effective_date] >= DATE(YEAR(TODAY()), MONTH(TODAY()), 1)
+)
+
+// New Customers YTD
+New Customers YTD = 
+TOTALYTD(
+    COUNTROWS(dim_customer),
+    dim_customer[effective_date]
+)
+
+// ============================================================================
+// SEGMENTATION MEASURES
+// ============================================================================
+
+// Retail Customers
+Retail Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[customer_segment] = "RETAIL"
+)
+
+// SME Customers
+SME Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[customer_segment] = "SME"
+)
+
+// Corporate Customers
+Corporate Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[customer_segment] = "CORPORATE"
+)
+
+// Private Banking Customers
+Private Banking Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[customer_segment] = "PRIVATE_BANKING"
+)
+
+// Micro Customers
+Micro Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[customer_segment] = "MICRO"
+)
+
+// ============================================================================
+// ACCOUNT MEASURES
+// ============================================================================
+
+// Total Accounts
+Total Accounts = COUNTROWS(dim_account)
+
+// Savings Accounts
+Savings Accounts = 
+CALCULATE(
+    COUNTROWS(dim_account),
+    dim_account[account_type] = "SAVINGS"
+)
+
+// Current Accounts
+Current Accounts = 
+CALCULATE(
+    COUNTROWS(dim_account),
+    dim_account[account_type] = "CURRENT"
+)
+
+// Loan Accounts
+Loan Accounts = 
+CALCULATE(
+    COUNTROWS(dim_account),
+    dim_account[account_type] = "LOAN"
+)
+
+// Average Accounts per Customer
+Avg Accounts per Customer = 
+DIVIDE(
+    [Total Accounts],
+    [Active Customers],
+    0
+)
+
+// ============================================================================
+// BALANCE MEASURES
+// ============================================================================
+
+// Total Balance
+Total Balance = SUM(fact_account_daily_snapshot[closing_balance])
+
+// Average Balance
+Avg Balance = AVERAGE(fact_account_daily_snapshot[closing_balance])
+
+// Total Deposits (Savings + Current + Term)
+Total Deposits = 
+CALCULATE(
+    SUM(fact_deposit_snapshot[balance]),
+    dim_product[product_category] = "DEPOSIT"
+)
+
+// Average Deposit Balance
+Avg Deposit Balance = 
+CALCULATE(
+    AVERAGE(fact_deposit_snapshot[balance]),
+    dim_product[product_category] = "DEPOSIT"
+)
+
+// ============================================================================
+// TRANSACTION MEASURES
+// ============================================================================
+
+// Total Transactions
+Total Transactions = COUNTROWS(fact_transactions)
+
+// Total Transaction Volume
+Total Volume = SUM(fact_transactions[amount])
+
+// Total Fees Collected
+Total Fees = SUM(fact_transactions[fee_amount])
+
+// Average Transaction Amount
+Avg Transaction = AVERAGE(fact_transactions[amount])
+
+// Transactions per Customer
+Transactions per Customer = 
+DIVIDE(
+    [Total Transactions],
+    [Active Customers],
+    0
+)
+
+// Volume per Customer
+Volume per Customer = 
+DIVIDE(
+    [Total Volume],
+    [Active Customers],
+    0
+)
+
+// ============================================================================
+// CHANNEL MEASURES
+// ============================================================================
+
+// Counter Transactions
+Counter Transactions = 
+CALCULATE(
+    COUNTROWS(fact_transactions),
+    dim_channel[channel_code] = "COUNTER"
+)
+
+// ATM Transactions
+ATM Transactions = 
+CALCULATE(
+    COUNTROWS(fact_transactions),
+    dim_channel[channel_code] = "ATM"
+)
+
+// Mobile Transactions
+Mobile Transactions = 
+CALCULATE(
+    COUNTROWS(fact_transactions),
+    dim_channel[channel_code] = "MOBILE"
+)
+
+// Internet Transactions
+Internet Transactions = 
+CALCULATE(
+    COUNTROWS(fact_transactions),
+    dim_channel[channel_code] = "INTERNET"
+)
+
+// Digital Channel Ratio (%)
+Digital Ratio = 
+DIVIDE(
+    [Mobile Transactions] + [Internet Transactions],
+    [Total Transactions],
+    0
+) * 100
+
+// ============================================================================
+// PROFITABILITY MEASURES
+// ============================================================================
+
+// Revenue per Customer
+Revenue per Customer = 
+DIVIDE(
+    [Total Fees],
+    [Active Customers],
+    0
+)
+
+// Fee Income Ratio
+Fee Income Ratio = 
+DIVIDE(
+    [Total Fees],
+    [Total Volume],
+    0
+) * 100
+
+// Customer Lifetime Value (Simplified)
+CLV = 
+VAR AvgMonthlyBalance = [Avg Balance]
+VAR AvgMonthlyFees = DIVIDE([Total Fees], 12, 0)
+VAR AvgMonthlyInterest = AvgMonthlyBalance * 0.005  // Assume 0.5% monthly
+RETURN
+    (AvgMonthlyFees + AvgMonthlyInterest) * 12 * 5  // 5 year horizon
+
+// ============================================================================
+// KYC & COMPLIANCE MEASURES
+// ============================================================================
+
+// KYC Verified Customers
+KYC Verified = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[kyc_status] = "VERIFIED"
+)
+
+// KYC Pending Customers
+KYC Pending = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[kyc_status] = "PENDING"
+)
+
+// KYC Expired Customers
+KYC Expired = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[kyc_status] = "EXPIRED"
+)
+
+// KYC Completion Rate
+KYC Completion Rate = 
+DIVIDE(
+    [KYC Verified],
+    [Total Customers],
+    0
+) * 100
+
+// PEP Customers
+PEP Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[is_pep] = 1
+)
+
+// Sanctioned Customers
+Sanctioned Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[is_sanctioned] = 1
+)
+
+// ============================================================================
+// GEOGRAPHIC MEASURES
+// ============================================================================
+
+// Top Province by Customers
+Top Province Customers = 
+TOPN(
+    1,
+    ALL(dim_customer[province]),
+    CALCULATE(COUNTROWS(dim_customer)),
+    DESC
+)
+
+// Customer Concentration (HHI)
+Customer Concentration = 
+VAR TotalCust = [Total Customers]
+VAR HHI = 
+    SUMX(
+        VALUES(dim_customer[province]),
+        VAR ProvinceCust = COUNTROWS(dim_customer)
+        RETURN DIVIDE(ProvinceCust, TotalCust, 0) ^ 2
+    )
+RETURN
+    HHI * 10000
+
+// ============================================================================
+// GROWTH MEASURES
+// ============================================================================
+
+// Customer Growth MoM
+Customer Growth MoM = 
+VAR CurrentMonth = [Total Customers]
+VAR PreviousMonth = 
+    CALCULATE(
+        [Total Customers],
+        DATEADD(dim_date[full_date], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - PreviousMonth, PreviousMonth, 0) * 100
+
+// Balance Growth MoM
+Balance Growth MoM = 
+VAR CurrentMonth = [Total Balance]
+VAR PreviousMonth = 
+    CALCULATE(
+        [Total Balance],
+        DATEADD(dim_date[full_date], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - PreviousMonth, PreviousMonth, 0) * 100
+
+// Transaction Growth MoM
+Transaction Growth MoM = 
+VAR CurrentMonth = [Total Transactions]
+VAR PreviousMonth = 
+    CALCULATE(
+        [Total Transactions],
+        DATEADD(dim_date[full_date], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - PreviousMonth, PreviousMonth, 0) * 100
+
+// ============================================================================
+// RISK SEGMENTATION MEASURES
+// ============================================================================
+
+// Low Risk Customers
+Low Risk Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[risk_rating] = "LOW"
+)
+
+// Medium Risk Customers
+Medium Risk Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[risk_rating] = "MEDIUM"
+)
+
+// High Risk Customers
+High Risk Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[risk_rating] = "HIGH"
+)
+
+// Very High Risk Customers
+Very High Risk Customers = 
+CALCULATE(
+    COUNTROWS(dim_customer),
+    dim_customer[risk_rating] = "VERY_HIGH"
+)
