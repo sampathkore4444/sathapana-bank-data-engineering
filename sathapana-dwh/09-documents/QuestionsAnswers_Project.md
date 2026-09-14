@@ -479,4 +479,120 @@ The 10-database approach is **appropriate for a portfolio project** that aims to
 
 ---
 
+## Q11: Staging vs Raw Zone — Aren't They the Same Thing?
+
+**Question**: I read on forums that staging IS the raw data. Why does this project have both a raw zone AND a staging area?
+
+### Answer
+
+**Both approaches are valid.** Many projects combine them into one layer. This project separates them because it follows the enterprise banking pattern.
+
+### What Forums Often Show (Simplified)
+
+```
+Source ──► Staging (raw + cleansed) ──► DW ──► Marts
+```
+
+In this pattern, **staging IS the raw data**. It holds the exact source copy AND does cleansing in the same place. This is **valid and common** for small projects, single-team environments, and cloud ELT patterns (e.g., dbt, Snowflake).
+
+### What This Project Does (Enterprise Pattern)
+
+```
+Source ──► Raw Zone ──► Staging ──► DW ──► Marts
+           (copy)       (cleanse)
+```
+
+This **separates** the raw copy from the cleansing area. This is the **enterprise/banking pattern** used by larger organizations.
+
+### Why Separate Them?
+
+| Concern | Combined (Staging = Raw) | Separated (Raw + Staging) |
+|---------|------------------------|---------------------------|
+| **Audit** | ⚠️ Cleansed data overwrites raw | ✅ Raw preserved exactly as source |
+| **Recovery** | ❌ If ETL corrupts data, raw is lost | ✅ Raw always has source copy |
+| **Debugging** | ⚠️ Hard to see what source looked like | ✅ Compare raw vs staging to find issues |
+| **Regulatory** | ⚠️ Auditors may want exact source copy | ✅ Raw zone = audit evidence |
+| **Flexibility** | ❌ One place does two jobs | ✅ Each layer has one job |
+
+### Real Example: Why Separation Matters
+
+Imagine the source system sends this:
+
+```
+Source: customer_name = "John Smith"
+```
+
+But your ETL has a bug that converts it to:
+
+```
+Staging: customer_name = "JOHN SMITH"  (wrong — you uppercased it by mistake)
+```
+
+**If staging = raw (combined):**
+- ❌ You've overwritten the original
+- ❌ You can't recover "John Smith"
+- ❌ Auditor asks: "What was the original?" → You don't know
+
+**If raw + staging are separate:**
+- ✅ Raw still has "John Smith"
+- ✅ You can see the bug by comparing raw vs staging
+- ✅ You can fix and reprocess from raw
+
+### When Each Approach Is Used
+
+**Combined (Staging = Raw) — Common In:**
+
+| Scenario | Example |
+|----------|---------|
+| **Cloud ELT** | Snowflake, BigQuery — raw data lands in staging, transformations in-place |
+| **dbt projects** | Staging models are the raw+cleaned layer |
+| **Small teams** | One developer, simple pipeline |
+| **Real-time streaming** | Kafka → staging → DW (no separate raw) |
+| **Data lakes** | Raw zone is a folder in S3/ADLS, staging is another folder |
+
+**Separated (Raw + Staging) — Common In:**
+
+| Scenario | Example |
+|----------|---------|
+| **Banking/Finance** | Regulatory requirement for audit trail |
+| **Healthcare** | HIPAA compliance — must preserve original data |
+| **Large enterprises** | Multiple teams, complex ETL |
+| **On-premises SQL Server** | Traditional DWH pattern |
+| **Regulated industries** | NBC, Basel III, SOX compliance |
+
+### Industry Perspective
+
+| Approach | Raw Zone | Staging | Who Recommends |
+|----------|----------|---------|----------------|
+| **Kimball** | Optional (depends on need) | Recommended | Ralph Kimball |
+| **Inmon** | Recommended (audit trail) | Recommended | Bill Inmon |
+| **Data Vault** | Required (raw vault) | Required (business vault) | Dan Linstedt |
+| **Data Lake** | Required (bronze layer) | Required (silver layer) | Modern data stack |
+
+### Why This Project Separates Them
+
+```
+This project uses the SEPARATED pattern because:
+
+1. It's a BANKING project — regulatory compliance requires audit trail
+2. It demonstrates PRODUCTION patterns — not simplified learning patterns
+3. It shows you understand the WHY — not just the HOW
+
+But in your next project, you might use the COMBINED pattern if:
+1. It's a small project with no regulatory requirements
+2. You're using cloud ELT (dbt, Snowflake)
+3. The team is small and simplicity matters
+```
+
+### Summary
+
+| Pattern | Is It Wrong? | When to Use |
+|---------|-------------|-------------|
+| **Staging = Raw** (combined) | ❌ No — it's valid | Small projects, cloud ELT, no regulatory needs |
+| **Raw + Staging** (separated) | ❌ No — it's also valid | Banking, regulated industries, enterprise |
+
+**Both are correct.** The choice depends on your requirements. This project uses the separated pattern because banking regulations demand an audit trail.
+
+---
+
 *Last Updated: September 2026*
