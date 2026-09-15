@@ -153,6 +153,52 @@ This is the **master index** for all ETL-related documentation in the Sathapana 
 
 ---
 
+### 10. Security & Compliance
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| Security Framework | `15-security/SECURITY-FRAMEWORK-GUIDE.md` | RBAC, encryption, data masking, audit logging |
+| Data Governance | `09-documents/DATA-GOVERNANCE-GUIDE.md` | Data ownership, quality standards, lineage, retention |
+| Regulatory Reports | `18-regulatory-reports/REGULATORY-REPORTING-GUIDE.md` | NBC compliance, CAR, large exposures, liquidity |
+
+**Start here if:** You need to implement security or compliance features.
+
+---
+
+### 11. Operations & Performance
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| Performance Tuning | `19-performance/PERFORMANCE-TUNING-GUIDE.md` | Indexes, queries, partitioning, maintenance |
+| Partitioning Strategy | `16-partitioning/PARTITIONING-STRATEGY-GUIDE.md` | Table partitioning for large fact tables |
+| Disaster Recovery | `17-disaster-recovery/DISASTER-RECOVERY-GUIDE.md` | Backup, restore, HA strategies |
+
+**Start here if:** You need to optimize performance or ensure DR.
+
+---
+
+### 12. Reporting & Visualization
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| Power BI Integration | `13-powerbi/POWERBI-INTEGRATION-GUIDE.md` | Connection, data model, DAX measures, RLS |
+| Report Distribution | `22-report-distribution/REPORT-DISTRIBUTION-GUIDE.md` | Email distribution, scheduling, archiving |
+
+**Start here if:** You need to create reports or distribute them.
+
+---
+
+### 13. Additional Data Marts
+
+| Document | Location | Description |
+|----------|----------|-------------|
+| ALM Mart | `14-additional-marts/alm/ALM-MART-GUIDE.md` | Liquidity, interest rate risk, funding analysis |
+| Operations Mart | `14-additional-marts/operations/OPERATIONS-MART-GUIDE.md` | Branch performance, channel analytics |
+
+**Start here if:** You need specialized analytics beyond core banking.
+
+---
+
 ## 🎓 Recommended Learning Path
 
 ### Beginner Path (New to ETL)
