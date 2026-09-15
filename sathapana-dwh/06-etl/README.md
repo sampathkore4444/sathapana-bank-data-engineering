@@ -10,6 +10,10 @@ This directory contains the stored procedures that power the daily ETL pipeline 
 |------|---------|
 | `01-extract-procedures.sql` | Stored procedures for extracting data from source to raw/staging |
 | `02-transform-load-procedures.sql` | Stored procedures for transforming and loading into the DW |
+| `03-ETL-LEARNING-GUIDE.md` | Comprehensive ETL learning guide with all concepts |
+| `04-SCD-TYPE2-HANDS-ON-EXERCISE.md` | Step-by-step hands-on exercise for SCD Type 2 implementation |
+| `06-BUILD-ETL-PIPELINE-FROM-SCRATCH.md` | Complete guide to building an ETL pipeline from scratch |
+| `12-REAL-WORLD-BANKING-SCENARIOS.md` | Real-world banking ETL scenarios for Sathapana Bank |
 
 ## ETL Pipeline Architecture
 

@@ -9,6 +9,7 @@ This directory contains **Layer 3** — department-specific data marts that prov
 | File | Purpose |
 |------|---------|
 | `01-create-data-marts.sql` | Master script to create all data mart databases |
+| `08-DATA-MARTS.md` | Comprehensive data marts guide with implementation examples |
 
 ### Subdirectories
 

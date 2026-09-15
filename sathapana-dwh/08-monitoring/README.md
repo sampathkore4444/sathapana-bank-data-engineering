@@ -9,6 +9,7 @@ This directory contains the operational monitoring framework — tracking ETL jo
 | File | Purpose |
 |------|---------|
 | `01-monitoring-framework.sql` | Monitoring views, alerting procedures, and dashboard objects |
+| `09-ETL-MONITORING-AND-ALERTING.md` | Comprehensive ETL monitoring and alerting guide |
 
 ## Monitoring Objects
 

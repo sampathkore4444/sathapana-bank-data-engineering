@@ -9,6 +9,7 @@ This directory contains the automated data quality framework that validates data
 | File | Purpose |
 |------|---------|
 | `01-data-quality-framework.sql` | Quality rules, check procedures, and reporting views |
+| `07-DATA-QUALITY-CHECKS.md` | Comprehensive data quality checks guide with examples |
 
 ## Quality Dimensions
 

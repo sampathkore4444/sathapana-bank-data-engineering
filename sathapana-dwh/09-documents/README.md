@@ -17,19 +17,37 @@ sathapana-dwh/
 ├── 04-data-warehouse/        # Enterprise data warehouse
 │   └── 01-create-dwh-database.sql
 ├── 05-data-marts/            # Specialized data marts
-│   └── 01-create-data-marts.sql
+│   ├── 01-create-data-marts.sql
+│   └── 08-DATA-MARTS.md      # Data marts guide
 ├── 06-etl/                   # ETL procedures
 │   ├── 01-extract-procedures.sql
-│   └── 02-transform-load-procedures.sql
+│   ├── 02-transform-load-procedures.sql
+│   ├── 03-ETL-LEARNING-GUIDE.md
+│   ├── 04-SCD-TYPE2-HANDS-ON-EXERCISE.md
+│   ├── 06-BUILD-ETL-PIPELINE-FROM-SCRATCH.md
+│   └── 12-REAL-WORLD-BANKING-SCENARIOS.md
 ├── 07-data-quality/          # Data quality framework
-│   └── 01-data-quality-framework.sql
+│   ├── 01-data-quality-framework.sql
+│   └── 07-DATA-QUALITY-CHECKS.md
 ├── 08-monitoring/            # Monitoring & logging
-│   └── 01-monitoring-framework.sql
+│   ├── 01-monitoring-framework.sql
+│   └── 09-ETL-MONITORING-AND-ALERTING.md
 ├── 09-documents/             # Documentation
-│   └── README.md
+│   ├── README.md
+│   ├── ETL-MASTER-INDEX.md
+│   ├── ETL-QUICK-START-GUIDE.md
+│   ├── ETL-DEPLOYMENT-GUIDE.md
+│   ├── ETL-FAQ.md
+│   └── 11-DOCUMENTATION-TEMPLATES.md
 ├── 10-samples/               # Sample scripts
 │   └── 01-run-full-pipeline.sql
-└── 11-tests/                 # Test scripts (future)
+├── 20-testing/               # Testing framework
+│   ├── 01-testing-framework.sql
+│   └── 10-ETL-TESTING.md
+├── 21-cdc/                   # Change Data Capture
+│   ├── 01-change-data-capture-setup.sql
+│   └── 05-CDC-VS-INCREMENTAL-LOADS.md
+└── 12-automation/            # Automation & scheduling
 ```
 
 ## Database Architecture
